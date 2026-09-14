@@ -1,0 +1,79 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "LitThread",
+  "version": "0.1.0",
+  "identifier": "local.litthread",
+  "build": {
+    "beforeDevCommand": "pnpm pdfium:stage && pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm pdfium:stage && pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "LitThread · 文脉",
+        "dragDropEnabled": false,
+        "width": 1280,
+        "height": 800,
+        "minWidth": 960,
+        "minHeight": 520,
+        "visible": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "plugins": {
+    "fs": {
+      "requireLiteralLeadingDot": false
+    },
+    "deep-link": {
+      "desktop": {
+        "schemes": [
+          "litthread"
+        ]
+      },
+      "mobile": [
+        {
+          "scheme": [
+            "litthread"
+          ],
+          "appLink": false
+        }
+      ]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": false,
+    "targets": "all",
+    "category": "Productivity",
+    "copyright": "Copyright (c) 2026 Ustinian",
+    "license": "MIT",
+    "licenseFile": "../LICENSE",
+    "resources": {
+      "../LICENSE": "licenses/LICENSE",
+      "../templates/vault/.agents/skills/LICENSE-Supervisor-Skills.txt": "licenses/Supervisor-Skills.txt"
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/ios/AppIcon-512@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "entitlements": "./Entitlements.plist",
+      "minimumSystemVersion": "12.0"
+    },
+    "windows": {
+      "nsis": {
+        "sidebarImage": "icons/nsis-sidebar.bmp",
+        "installerHooks": "nsis/hooks.nsh"
+      }
+    }
+  }
+}

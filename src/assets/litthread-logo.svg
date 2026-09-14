@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 128 128">
+<title>LitThread · 文脉</title>
+  <rect width="128" height="128" rx="28" fill="#203f3c"/>
+  <path d="M35 29v60a10 10 0 0 0 10 10h47" fill="none" stroke="#f4eee0" stroke-width="9" stroke-linecap="round"/>
+  <path d="M53 31h44M75 31v42c0 13-17 13-17 0V55" fill="none" stroke="#d5ab80" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M48 109h37" fill="none" stroke="#6d9187" stroke-width="2" stroke-linecap="round"/>
+</svg>

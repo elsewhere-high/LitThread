@@ -1,0 +1,35 @@
+[package]
+name = "litthread-cli"
+version = "0.1.0"
+edition = "2021"
+description = "Headless LitThread CLI for Vault / Catalog (no BYOA)"
+license.workspace = true
+publish = false
+
+# Binary file is `litthread-cli` so it does not collide with the desktop GUI
+# binary (`litthread` from the `litthread` package) in the shared target dir.
+# User-facing PATH install still exposes the command as `litthread` via shim.
+[[bin]]
+name = "litthread-cli"
+path = "src/main.rs"
+
+[dependencies]
+# Tauri-free domain services (catalog, vault, import, wiki, feeds, zotero, …).
+litthread-core = { path = "../crates/litthread-core" }
+clap = { version = "4", features = ["derive", "env"] }
+clap_complete = "4"
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+dirs = { workspace = true }
+toml = "0.8"
+# Interactive prompts (TTY only; skipped under --json / non-TTY)
+inquire = "0.7"
+log = { workspace = true }
+env_logger = "0.11"
+
+[dev-dependencies]
+assert_cmd = "2"
+predicates = "3"
+tempfile = { workspace = true }
+serde_json = { workspace = true }

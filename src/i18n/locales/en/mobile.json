@@ -1,0 +1,84 @@
+{
+	"tabs": {
+		"navigation": "Main navigation",
+		"library": "Library",
+		"agent": "Agent",
+		"settings": "Settings"
+	},
+	"connect": {
+		"title": "Take the thread with you.",
+		"paste": "Paste pairing link",
+		"placeholder": "litthread://pair#offer=…",
+		"action": "Connect",
+		"connecting": "Connecting…",
+		"camera": "Scan QR code",
+		"manual": "Enter pairing link",
+		"cancel": "Cancel",
+		"cameraHint": "Point the camera at the pairing code on your computer.",
+		"cameraUnavailable": "Camera access is unavailable. Paste the pairing link instead.",
+		"offline": "Desktop offline",
+		"pending": "Confirm the code on your desktop",
+		"code": "Confirmation code",
+		"progress": {
+			"relayConnecting": "Connecting to relay…",
+			"e2eeHandshake": "Securing the connection…",
+			"pairing": "Requesting pairing…",
+			"authenticating": "Signing in to the desktop…",
+			"connected": "Connected"
+		},
+		"description": "Connect to your desktop library to read papers, revisit notes and continue a conversation.",
+		"stepHost": "Enable remote access on your desktop",
+		"stepScan": "Scan the desktop pairing code",
+		"stepVerify": "Verify the code and approve the connection",
+		"previewOnly": "Browser preview only. Use the LitThread mobile app to connect to your desktop library."
+	},
+	"library": {
+		"title": "Library",
+		"search": "Search papers",
+		"loading": "Loading papers…",
+		"empty": "No papers"
+	},
+	"reader": {
+		"title": "Notes",
+		"back": "Back to library",
+		"pdf": "PDF",
+		"notes": "Notes",
+		"loadingPdf": "Loading PDF…",
+		"pdfUnavailable": "This paper has no PDF available on the desktop.",
+		"empty": "Choose a paper",
+		"save": "Save notes",
+		"saving": "Saving…"
+	},
+	"agent": {
+		"title": "Agent",
+		"placeholder": "Ask about your research",
+		"send": "Send",
+		"empty": "Start a conversation",
+		"thinking": "Thinking...",
+		"failed": "The desktop Agent could not complete this request.",
+		"switchBackend": "Switch Agent backend",
+		"defaultBackend": "Default Agent",
+		"history": "Sessions",
+		"historyEmpty": "No past sessions",
+		"historyUnsupported": "This Agent does not expose past sessions.",
+		"restoring": "Restoring session…"
+	},
+	"settings": {
+		"title": "Connection",
+		"menu": "Open menu",
+		"closeMenu": "Close menu",
+		"connected": "Connected",
+		"offline": "Offline",
+		"addDesktop": "Connect another desktop",
+		"addDevice": "Add device",
+		"disconnect": "Disconnect",
+		"computer": "Computer",
+		"vault": "Vault",
+		"vaults": "Vaults"
+	},
+	"errors": {
+		"load": "Could not load remote data",
+		"connect": "Could not connect",
+		"networkPermission": "iOS is blocking network access for LitThread. Open Settings > LitThread and allow Wireless Data (WLAN & Cellular), then try again."
+	}
+}

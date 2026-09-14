@@ -1,0 +1,28 @@
+{
+  "app": {
+    "windows": [
+      {
+        "title": "LitThread · 文脉",
+        "dragDropEnabled": false,
+        "width": 1280,
+        "height": 800,
+        "minWidth": 960,
+        "minHeight": 520,
+        "visible": false,
+        "hiddenTitle": true,
+        "titleBarStyle": "Overlay",
+        "trafficLightPosition": {
+          "x": 14,
+          "y": 18
+        }
+      }
+    ]
+  },
+  "bundle": {
+    "macOS": {
+      "frameworks": [
+        "pdfium/libpdfium.dylib"
+      ]
+    }
+  }
+}

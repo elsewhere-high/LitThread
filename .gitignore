@@ -1,0 +1,43 @@
+# Installed tools and dependencies
+node_modules/
+.pnpm-store/
+.toolchains/
+.tools/
+
+# Build outputs and generated native glue
+/dist/
+/target/
+/target-ios/
+src-tauri/target/
+src-tauri/pdfium/
+src-tauri/binaries/
+src-tauri/gen/android/.gradle/
+src-tauri/gen/android/**/build/
+src-tauri/gen/android/local.properties
+src-tauri/gen/android/tauri.settings.gradle
+src-tauri/gen/android/app/tauri.build.gradle.kts
+src-tauri/gen/apple/Externals/
+src-tauri/gen/apple/assets/
+src-tauri/gen/apple/build/
+**/xcuserdata/
+
+# Credentials and signing
+.env
+.env.*
+!.env.example
+*.p12
+*.p8
+*.mobileprovision
+*.keystore
+keystore.properties
+tauri.properties
+
+# Local work, test vaults and caches
+/.qa/
+/tmp/
+/coverage/
+*.log
+*.tsbuildinfo
+.DS_Store
+.idea/
+.vscode/
