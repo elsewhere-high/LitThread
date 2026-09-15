@@ -59,4 +59,4 @@ pnpm tauri build --debug --bundles app
 - [可选服务](docs/services.md)：端点、凭据与本地配置。
 - [界面规范](docs/brand.md)：品牌资源和组件约定。
 
-项目代码采用 [MIT License](LICENSE)，版权署名为 © 2026 Ustinian。随应用提供的部分研究技能带有独立第三方许可，见 [技能许可说明](templates/vault/.agents/skills/README.md)。应用资源目录的 `licenses/` 分别包含项目许可和研究技能的第三方声明。
+项目代码采用 [GNU AGPL 第 3 版](LICENSE)（`AGPL-3.0-only`，仅限第 3 版），版权署名为 © 2026 Ustinian5。随应用提供的部分研究技能带有独立第三方许可，见 [技能许可说明](templates/vault/.agents/skills/README.md)。应用资源目录的 `licenses/` 分别包含项目许可和研究技能的第三方声明。

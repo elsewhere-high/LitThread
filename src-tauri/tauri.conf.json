@@ -50,8 +50,8 @@
     "createUpdaterArtifacts": false,
     "targets": "all",
     "category": "Productivity",
-    "copyright": "Copyright (c) 2026 Ustinian",
-    "license": "MIT",
+    "copyright": "Copyright (c) 2026 Ustinian5",
+    "license": "AGPL-3.0-only",
     "licenseFile": "../LICENSE",
     "resources": {
       "../LICENSE": "licenses/LICENSE",

@@ -3,7 +3,7 @@ members = ["src-tauri", "cli", "crates/litthread-core"]
 resolver = "2"
 
 [workspace.package]
-license = "MIT"
+license = "AGPL-3.0-only"
 
 # Shared dependencies declared once for both members (src-tauri / cli).
 # Only version + common features live here; `optional`, target-specific

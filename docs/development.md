@@ -37,7 +37,7 @@ pnpm tauri dev
 
 ## 打包
 
-项目许可由根目录 `LICENSE` 定义；Rust 各 crate 继承 workspace 的 MIT 标识，前端清单与 Tauri 打包配置保持一致。公共资源映射将项目许可放在 `licenses/LICENSE`，研究技能的第三方声明放在 `licenses/Supervisor-Skills.txt`。平台配置合并时保留此映射；Windows/Linux 追加 PDFium 资源，macOS 使用 Frameworks，移动端不携带桌面 PDFium。
+项目许可由根目录 `LICENSE` 定义；Rust 各 crate 继承 workspace 的 `AGPL-3.0-only` 标识，前端清单与 Tauri 打包配置保持一致，项目版权主体为 GitHub 用户 Ustinian5。公共资源映射将项目许可放在 `licenses/LICENSE`，研究技能的第三方声明放在 `licenses/Supervisor-Skills.txt`。平台配置合并时保留此映射；Windows/Linux 追加 PDFium 资源，macOS 使用 Frameworks，移动端不携带桌面 PDFium。
 
 `pnpm pdfium:stage` 下载与解析依赖一致的 PDFium 并复制到原生资源目录。macOS 将动态库装入 `Contents/Frameworks`；其他桌面平台使用 bundle resources。CLI 默认单独构建。发行签名、移动平台证书和更新通道没有预设，需要维护者独立配置。
 
