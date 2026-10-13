@@ -7,7 +7,8 @@ use crate::features::wiki::models::{
 use std::collections::HashMap;
 use std::path::Path;
 
-/// Normalize a Vault-relative forward-slash path without allowing it to escape the root.
+/// Normalize separators and cancellable components. Unmatched parents remain
+/// visible so callers can reject paths that exceed the Vault boundary.
 pub fn normalize_rel(path: &str) -> String {
     let normalized = path.replace('\\', "/");
     let mut parts = Vec::new();
@@ -15,7 +16,9 @@ pub fn normalize_rel(path: &str) -> String {
         match component {
             "" | "." => {}
             ".." => {
-                if parts.pop().is_none() {
+                if parts.last().is_some_and(|value| *value != "..") {
+                    parts.pop();
+                } else {
                     parts.push("..");
                 }
             }
@@ -70,8 +73,14 @@ fn add_extensions(value: &str) -> Vec<String> {
 }
 
 fn source_relative(source: &str, target: &str) -> String {
-    let parent = Path::new(source).parent().unwrap_or_else(|| Path::new(""));
-    normalize_rel(&parent.join(target).to_string_lossy())
+    // Vault paths are portable data, independent of the host OS's Path rules.
+    let source = source.replace('\\', "/");
+    let parent = source.rsplit_once('/').map_or("", |(parent, _)| parent);
+    normalize_rel(&format!("{parent}/{target}"))
+}
+
+fn outside_vault(path: &str) -> bool {
+    path == ".." || path.starts_with("../")
 }
 
 fn unique(mut candidates: Vec<String>) -> Result<String, Vec<String>> {
@@ -160,7 +169,8 @@ fn resolve_document(
             .ok_or_else(Vec::new);
     }
 
-    let raw = occurrence.target_raw.trim();
+    let portable_target = occurrence.target_raw.trim().replace('\\', "/");
+    let raw = portable_target.as_str();
     // Source-relative resolution:
     // - Markdown destinations are always source-relative (CommonMark).
     // - Wikilinks only when explicitly relative (`./` / `../`), so vault paths
@@ -175,10 +185,12 @@ fn resolve_document(
         // If resolving would escape the Vault, do not fall through to a
         // root/suffix/stem match: `../../Target.md` must never silently become
         // `Target.md` at vault root.
-        if relative == ".." || relative.starts_with("../") {
+        if outside_vault(&relative) {
             return Err(Vec::new());
         }
         exact_candidates.extend(add_extensions(&relative));
+    } else if outside_vault(&normalize_rel(raw)) {
+        return Err(Vec::new());
     }
     exact_candidates.extend(add_extensions(raw));
     for candidate in &exact_candidates {
@@ -614,6 +626,71 @@ mod tests {
     struct SemanticFixture {
         documents: Vec<FixtureDocument>,
         cases: Vec<FixtureCase>,
+    }
+
+    #[test]
+    fn normalization_preserves_every_unmatched_parent() {
+        for (input, expected) in [
+            ("../../Target.md", "../../Target.md"),
+            ("../notes/../../Target.md", "../../Target.md"),
+            ("notes/../../../Target.md", "../../Target.md"),
+            (r"notes\..\..\..\Target.md", "../../Target.md"),
+            ("notes/deep/../../Target.md", "Target.md"),
+        ] {
+            assert_eq!(normalize_rel(input), expected, "{input}");
+        }
+    }
+
+    #[test]
+    fn excessive_parent_components_never_fall_back_to_a_vault_document() {
+        let (target, _) = extract_document("Target.md", "# Target\n");
+        let docs = vec![target];
+        for depth in 0..=4 {
+            let source = format!("{}source.md", "notes/".repeat(depth));
+            for excess in 1..=5 {
+                let target = format!("{}Target.md", "../".repeat(depth + excess));
+                for syntax in [InternalLinkSyntax::Wikilink, InternalLinkSyntax::Markdown] {
+                    let mut link = occurrence(&source, &target, None);
+                    link.syntax = syntax;
+                    let resolved = resolve_occurrence(link, &docs);
+                    assert_eq!(
+                        resolved.status,
+                        LinkResolutionStatus::Missing,
+                        "{source} -> {target}"
+                    );
+                    assert_eq!(resolved.target_path, None);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn root_relative_parent_escape_is_not_reinterpreted_as_a_short_name() {
+        let (target, _) = extract_document("Target.md", "# Target\n");
+        for raw in ["/../Target.md", "/../../Target.md", "/../../../Target"] {
+            let resolved = resolve_occurrence(
+                occurrence("notes/source.md", raw, None),
+                std::slice::from_ref(&target),
+            );
+            assert_eq!(resolved.status, LinkResolutionStatus::Missing, "{raw}");
+        }
+    }
+
+    #[test]
+    fn windows_relative_paths_use_the_same_parent_boundary_on_every_host() {
+        let (target, _) = extract_document("Target.md", "# Target\n");
+        let docs = vec![target];
+        for syntax in [InternalLinkSyntax::Wikilink, InternalLinkSyntax::Markdown] {
+            for (raw, expected) in [
+                (r"..\Target.md", LinkResolutionStatus::Resolved),
+                (r"..\..\Target.md", LinkResolutionStatus::Missing),
+                (r"..\..\..\Target.md", LinkResolutionStatus::Missing),
+            ] {
+                let mut link = occurrence(r"notes\source.md", raw, None);
+                link.syntax = syntax.clone();
+                assert_eq!(resolve_occurrence(link, &docs).status, expected, "{raw}");
+            }
+        }
     }
 
     #[derive(Deserialize)]

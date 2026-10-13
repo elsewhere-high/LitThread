@@ -113,9 +113,12 @@ export const COLUMN_META = {
 					ctx={ctx}
 					className="block w-full text-left font-medium"
 				>
-					<ReadingTitleHeat heatmap={ctx.heat} className="line-clamp-1">
-						<span className="flex min-w-0 items-center gap-1">
-							<MathText text={p.title} className="block min-w-0 truncate" />
+					<ReadingTitleHeat heatmap={ctx.heat}>
+						<span className="flex min-w-0 items-start gap-1">
+							<MathText
+								text={p.title}
+								className="line-clamp-2 min-w-0 break-words leading-relaxed"
+							/>
 							{isMissingLocalPdf(p) ? (
 								<Tooltip>
 									<TooltipTrigger asChild>

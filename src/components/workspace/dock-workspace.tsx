@@ -46,7 +46,6 @@ import {
 import { DocView, type DocViewProps } from "@/components/workspace/doc-view";
 import { LitThreadTabGroupChip } from "@/components/workspace/tab-group-chip";
 import { cn } from "@/lib/core/utils";
-import { isLibraryVirtualPath, isTrashVirtualPath } from "@/lib/paper/api";
 import { moveDocToWindow } from "@/lib/shell/leaf";
 import { TAG_COLOR_IDS, tagSwatchStyle } from "@/lib/ui/tag-colors";
 import { installDockviewDragSelectionGuard } from "@/lib/workspace/dockview-drag-selection";
@@ -65,6 +64,7 @@ import {
 	tabNotesEligible,
 } from "@/lib/workspace/tabs";
 import type { CenterViewMode } from "@/lib/workspace/viewer";
+import { canDetachDocument } from "@/lib/workspace/virtual-views";
 
 /** Grey + paper tag palette (same swatches as library tags). */
 const TAB_GROUP_COLORS = ["grey", ...TAG_COLOR_IDS] as const;
@@ -547,6 +547,12 @@ export const DockWorkspace = memo(
 		const endSync = useCallback(
 			(api: DockviewApi) => {
 				requestAnimationFrame(() => {
+					if (apiRef.current !== api) return;
+					const root = workspaceRootRef.current;
+					// Restored always-mounted panels can retain their pre-layout size
+					// in WKWebView. Measure after React commits, without a window resize.
+					if (root && root.clientWidth > 0 && root.clientHeight > 0)
+						api.layout(root.clientWidth, root.clientHeight, true);
 					syncingRef.current = false;
 					onActiveRef.current(api.activePanel?.id ?? null);
 					publishVisiblePanels(api);
@@ -834,8 +840,7 @@ export const DockWorkspace = memo(
 					tab != null &&
 					tab.kind !== "library" &&
 					tab.kind !== "trash" &&
-					!isLibraryVirtualPath(tab.path) &&
-					!isTrashVirtualPath(tab.path);
+					canDetachDocument(tab.path);
 				if (canMoveToWindow && tab) {
 					menu.push({
 						label: t("tabs.contextMoveToNewWindow"),

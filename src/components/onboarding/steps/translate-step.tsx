@@ -28,6 +28,7 @@ import {
 	BUILTIN_PROVIDER_ID,
 	loadBuiltinProviderStatus,
 } from "@/lib/core/builtin";
+import { openExternalUrl } from "@/lib/core/open-external";
 import { cn } from "@/lib/core/utils";
 import type {
 	AppSettings,
@@ -47,14 +48,6 @@ import {
 	probeCommercialMtProvider,
 } from "@/lib/translate";
 import { DEFAULT_TRANSLATE_SETTINGS } from "@/lib/translate/defaults";
-
-function openExternalUrl(url: string): void {
-	void import("@tauri-apps/plugin-opener")
-		.then(({ openUrl }) => openUrl(url))
-		.catch(() => {
-			window.open(url, "_blank", "noopener,noreferrer");
-		});
-}
 
 const FIRST_COMMERCIAL_PROVIDER: CommercialTranslateProviderId = "deepl";
 

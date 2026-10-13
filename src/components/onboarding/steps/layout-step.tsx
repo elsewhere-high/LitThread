@@ -18,6 +18,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { openExternalUrl } from "@/lib/core/open-external";
 import { cn } from "@/lib/core/utils";
 import {
 	persistLayoutProviderConfig,
@@ -34,14 +35,6 @@ import {
 	type LayoutProviderId,
 } from "@/lib/pdf/layout/settings";
 import type { AppSettings } from "@/lib/settings";
-
-function openExternalUrl(url: string): void {
-	void import("@tauri-apps/plugin-opener")
-		.then(({ openUrl }) => openUrl(url))
-		.catch(() => {
-			window.open(url, "_blank", "noopener,noreferrer");
-		});
-}
 
 const REMOTE_PROVIDERS = Object.values(LAYOUT_PROVIDERS).filter(
 	isRemoteLayoutProvider,

@@ -1,6 +1,3 @@
-import { getVersion } from "@tauri-apps/api/app";
-import { appLogDir } from "@tauri-apps/api/path";
-import { openPath, openUrl } from "@tauri-apps/plugin-opener";
 import {
 	Download,
 	FolderOpen,
@@ -30,6 +27,11 @@ import {
 	uninstallFinderService,
 } from "@/lib/cli/api";
 import { clearLogs } from "@/lib/core/logger";
+import {
+	nativeAppVersion,
+	openNativeLogDirectory,
+	openNativeUrl,
+} from "@/lib/core/native-shell";
 import { notifyError, notifySuccess } from "@/lib/core/notify";
 import { isMacOS, isTauri, isWindows } from "@/lib/core/tauri";
 import {
@@ -78,7 +80,7 @@ export function AboutPane() {
 	}, [isMac]);
 
 	useEffect(() => {
-		void getVersion()
+		void nativeAppVersion()
 			.then(setVersion)
 			.catch(() => undefined);
 	}, []);
@@ -172,19 +174,17 @@ export function AboutPane() {
 	const onOpenCliRelease = () => {
 		const url = cli?.releasePageUrl;
 		if (!url) return;
-		void openUrl(url).catch(() =>
+		void openNativeUrl(url).catch(() =>
 			notifyError(t("about.cli.openReleaseFailed")),
 		);
 	};
 	const onOpenLogFolder = () => {
-		void appLogDir()
-			.then((dir) => openPath(dir))
-			.catch((err) => {
-				console.error("open log folder failed", err);
-				notifyError(t("about.logs.openFailed"), {
-					description: err instanceof Error ? err.message : String(err),
-				});
+		void openNativeLogDirectory().catch((err) => {
+			console.error("open log folder failed", err);
+			notifyError(t("about.logs.openFailed"), {
+				description: err instanceof Error ? err.message : String(err),
 			});
+		});
 	};
 	const onClearLogs = () => {
 		setLogsBusy(true);

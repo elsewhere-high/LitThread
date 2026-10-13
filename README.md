@@ -1,6 +1,6 @@
 # LitThread · 文脉
 
-一张本地研究书桌：收集文献，阅读与批注，记录笔记，再把问题带进研究对话。资料保存在自己的文件夹中，Markdown 笔记可被其他编辑器读取。
+一张本地研究书桌：收集文献，阅读与批注，记录笔记，围绕问题整理支持证据与反证，再带进研究对话。资料保存在自己的文件夹中，Markdown 笔记可被其他编辑器读取。
 
 ![文脉文献索引](docs/images/workspace.jpg)
 
@@ -28,6 +28,7 @@ pnpm tauri dev
 | 收集 | PDF 导入、标题/DOI/arXiv 查询、Zotero 迁移与 Connector、目录扫描 |
 | 阅读 | PDF 与 Markdown、文本批注、阅读位置、引用与版面解析 |
 | 记录 | Markdown 编辑、公式、Mermaid、双向链接、论文 `NOTES.md` |
+| 论证 | 问题与假设、带页码的证据与反证、Markdown 研究笔记、手动准备 AI 审查 |
 | 研究 | ACP Agent、上下文提及、技能、会话与权限确认 |
 | 发现 | 订阅信息流、arXiv 推荐与第三方论文来源 |
 | 携带 | 桌面远程访问、移动配对、SSH 知识库、可选同步 |
@@ -58,5 +59,11 @@ pnpm tauri build --debug --bundles app
 - [命令行](docs/cli.md)：从源码目录外使用 CLI。
 - [可选服务](docs/services.md)：端点、凭据与本地配置。
 - [界面规范](docs/brand.md)：品牌资源和组件约定。
+- [参赛准备](docs/competition.md)：演示流程、贡献边界与来源说明。
+- [第三方技术与资源](docs/third-party.md)：关键依赖、来源注释与独立许可。
+
+## 参与开发
+
+欢迎通过本仓库的 Issues 提交可复现问题或需求，通过 Pull Request 提交改进。问题报告请注明系统、版本、操作步骤和预期结果，优先使用自编样本复现；不要上传真实知识库或凭据。提交代码前运行与改动有关的检查，界面文案同步英文和简体中文，并保留现有数据与权限契约。维护说明见 [开发与验证](docs/development.md)。
 
 项目代码采用 [GNU AGPL 第 3 版](LICENSE)（`AGPL-3.0-only`，仅限第 3 版），版权署名为 © 2026 Ustinian5。随应用提供的部分研究技能带有独立第三方许可，见 [技能许可说明](templates/vault/.agents/skills/README.md)。应用资源目录的 `licenses/` 分别包含项目许可和研究技能的第三方声明。

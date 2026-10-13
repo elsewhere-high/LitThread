@@ -27,6 +27,11 @@ const MarkdownEditor = lazy(() =>
 		default: m.MarkdownEditor,
 	})),
 );
+const ResearchDesk = lazy(() =>
+	import("@/components/research/research-desk").then((m) => ({
+		default: m.ResearchDesk,
+	})),
+);
 const PlazaView = lazy(() =>
 	import("@/components/plaza/plaza-view").then((m) => ({
 		default: m.PlazaView,
@@ -157,7 +162,7 @@ function docViewPropsEqual(prev: DocViewProps, next: DocViewProps): boolean {
 			prev.trashReloadSignal === next.trashReloadSignal
 		);
 	}
-	if (tab.kind === "plaza") return true;
+	if (tab.kind === "plaza" || tab.kind === "research") return true;
 	if (tab.mode === "markdown") return prev.editor === next.editor;
 	if (tab.mode === "pdf" || tab.mode === "translation")
 		return prev.pdf === next.pdf;
@@ -198,6 +203,12 @@ export const DocView = memo(function DocView({
 	if (!tab.loaded) {
 		return <TabLoadingSkeleton />;
 	}
+	if (tab.kind === "research")
+		return (
+			<Suspense fallback={<TabLoadingSkeleton />}>
+				<ResearchDesk key={vaultPath} vaultPath={vaultPath} />
+			</Suspense>
+		);
 	if (tab.kind === "library") {
 		return (
 			<PapersLibrary

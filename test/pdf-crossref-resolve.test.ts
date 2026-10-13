@@ -19,7 +19,22 @@ function region(
 	title?: string,
 	id = "r",
 ): PdfLayoutRegion {
-	return { pageIndex, kind, bbox, score: 1, id, title };
+	return {
+		pageIndex,
+		kind,
+		label: kind,
+		bbox,
+		rect: {
+			x: bbox.x * 100,
+			y: bbox.y * 100,
+			w: bbox.w * 100,
+			h: bbox.h * 100,
+		},
+		readingOrder: 0,
+		score: 1,
+		id,
+		title,
+	};
 }
 
 describe("pickCrossrefRegionByLabel", () => {

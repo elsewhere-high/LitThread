@@ -1,5 +1,3 @@
-import { homeDir, join } from "@tauri-apps/api/path";
-import { openUrl } from "@tauri-apps/plugin-opener";
 import {
 	BookOpen,
 	CheckCircle2,
@@ -34,9 +32,11 @@ import {
 import { useOverlayRegistration } from "@/hooks/use-overlay-registration";
 import i18n from "@/i18n";
 import { errorText } from "@/lib/core/error";
+import { openExternalUrl } from "@/lib/core/open-external";
 import { readJsonStorage, writeJsonStorage } from "@/lib/core/storage";
 import { runLocalActivity } from "@/lib/core/tasks";
 import { isTauri } from "@/lib/core/tauri";
+import { defaultZoteroDirectory } from "@/lib/paper/import/zotero-directory";
 import {
 	isSqliteMissingError,
 	migrateZotero,
@@ -91,9 +91,7 @@ function saveOpts(o: SavedOpts) {
 const IMPORT_TUTORIAL_URL =
 	"https://www.zotero.org/support/preferences/advanced";
 function openTutorial() {
-	void openUrl(IMPORT_TUTORIAL_URL).catch(() => {
-		window.open(IMPORT_TUTORIAL_URL, "_blank");
-	});
+	openExternalUrl(IMPORT_TUTORIAL_URL);
 }
 
 /**
@@ -201,7 +199,7 @@ export function ZoteroMigrateDialog({
 		void (async () => {
 			setDetecting(true);
 			try {
-				const candidate = await join(await homeDir(), "Zotero");
+				const candidate = await defaultZoteroDirectory();
 				const r = await scanZotero(candidate);
 				if (!cancelled && r.valid && r.itemCount > 0) {
 					setDir(candidate);

@@ -6,6 +6,16 @@
 module.exports = {
 	forbidden: [
 		{
+			name: "presentation-no-native-io",
+			comment:
+				"Native file, opener, and window operations belong in src/lib adapters.",
+			severity: "error",
+			from: { path: "^src/(components|App\\.tsx)" },
+			to: {
+				path: "^node_modules/@tauri-apps/(plugin-(fs|opener)|api/(app|path|window))",
+			},
+		},
+		{
 			name: "no-circular",
 			comment: "Module cycles make init order fragile (see lib barrel cycles).",
 			severity: "error",

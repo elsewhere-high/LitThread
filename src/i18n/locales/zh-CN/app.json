@@ -299,6 +299,7 @@
 		},
 		"sourcesEyebrow": "研究发现台",
 		"sourceOpen": "打开来源",
-		"noSources": "在设置中启用来源，开始探索。"
+		"noSources": "在设置中启用来源，开始探索。",
+		"research": "证据"
 	}
 }

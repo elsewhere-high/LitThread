@@ -1,22 +1,16 @@
-import {
-	isLibraryVirtualPath,
-	isTrashVirtualPath,
-	LIBRARY_VIRTUAL_PATH,
-	TRASH_VIRTUAL_PATH,
-} from "@/lib/paper/api";
-import { isPlazaVirtualPath, plazaTitleForPath } from "@/lib/plaza";
+import { isLibraryVirtualPath, LIBRARY_VIRTUAL_PATH } from "@/lib/paper/api";
 import { basenameOf, normalizePathKey } from "@/lib/vault/path";
 import type { DocTab } from "@/lib/workspace/tabs/types";
 import type { CenterViewMode } from "@/lib/workspace/viewer";
+import { resolveVirtualView } from "@/lib/workspace/virtual-views";
 
 export { basenameOf, normalizePathKey as normalizeTabPath };
 
 const SPLIT_PANE_ID_MARKER = "::pane-";
 
 export function tabIdForPath(path: string): string {
-	if (isLibraryVirtualPath(path)) return LIBRARY_VIRTUAL_PATH;
-	if (isTrashVirtualPath(path)) return TRASH_VIRTUAL_PATH;
-	if (isPlazaVirtualPath(path)) return path;
+	const view = resolveVirtualView(path);
+	if (view) return view.path;
 	return normalizePathKey(path);
 }
 
@@ -55,8 +49,7 @@ function remapTabIdForPath(
 
 /** Rewrite one absolute or Vault-relative path under a moved root. */
 export function remapPathUnder(path: string, from: string, to: string): string {
-	if (isLibraryVirtualPath(path) || isTrashVirtualPath(path)) return path;
-	if (isPlazaVirtualPath(path)) return path;
+	if (resolveVirtualView(path)) return path;
 	const current = path.replace(/\\/g, "/").replace(/\/+$/, "");
 	const oldRoot = from.replace(/\\/g, "/").replace(/\/+$/, "");
 	const newRoot = to.replace(/\\/g, "/").replace(/\/+$/, "");
@@ -112,30 +105,12 @@ export function createPlaceholderTab(
 	preferMode: CenterViewMode = "markdown",
 	id = tabIdForPath(path),
 ): DocTab {
-	const isLibrary = isLibraryVirtualPath(path);
-	const isTrash = isTrashVirtualPath(path);
-	const isPlaza = isPlazaVirtualPath(path);
+	const view = resolveVirtualView(path);
 	return {
 		id,
-		path: isLibrary
-			? LIBRARY_VIRTUAL_PATH
-			: isTrash
-				? TRASH_VIRTUAL_PATH
-				: path,
-		kind: isLibrary
-			? "library"
-			: isTrash
-				? "trash"
-				: isPlaza
-					? "plaza"
-					: "file",
-		title: isLibrary
-			? "Library"
-			: isTrash
-				? "Recycle Bin"
-				: isPlaza
-					? plazaTitleForPath(path)
-					: basenameOf(path),
+		path: view?.path ?? path,
+		kind: view?.kind ?? "file",
+		title: view?.title ?? basenameOf(path),
 		mode: preferMode,
 		paperMeta: null,
 		pdfUrl: null,
@@ -230,7 +205,7 @@ export function removeTabsUnderPath(
 	const survivors: DocTab[] = [];
 	const removed: DocTab[] = [];
 	for (const t of prev) {
-		if (isLibraryVirtualPath(t.path) || isPlazaVirtualPath(t.path)) {
+		if (resolveVirtualView(t.path)) {
 			survivors.push(t);
 			continue;
 		}

@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/tooltip";
 import { BUILTIN_PROVIDER_ID } from "@/lib/core/builtin";
 import { errorMessage, notifyError, notifySuccess } from "@/lib/core/notify";
+import { openExternalUrl } from "@/lib/core/open-external";
 import { isTauri } from "@/lib/core/tauri";
 import { cn } from "@/lib/core/utils";
 import {
@@ -73,14 +74,6 @@ import {
 	PROVIDER_MODEL_PRESETS,
 } from "@/lib/pdf/layout/settings";
 import type { AppSettings } from "@/lib/settings";
-
-function openExternalUrl(url: string): void {
-	void import("@tauri-apps/plugin-opener")
-		.then(({ openUrl }) => openUrl(url))
-		.catch(() => {
-			window.open(url, "_blank", "noopener,noreferrer");
-		});
-}
 
 const EMPTY_PROVIDER_CONFIG: LayoutProviderConfig = {
 	apiKey: "",

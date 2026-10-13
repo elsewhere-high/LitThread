@@ -23,12 +23,6 @@ import {
 	REMOTE_ARXIV_PREFIX,
 	revokePdfViewerSource,
 } from "@/lib/paper";
-import { isLibraryVirtualPath, isTrashVirtualPath } from "@/lib/paper/api";
-import {
-	isPlazaVirtualPath,
-	plazaSourceForPath,
-	plazaTitleForPath,
-} from "@/lib/plaza";
 import {
 	ensureLocalFsScope,
 	type FileNode,
@@ -49,6 +43,7 @@ import {
 	isPdfPath,
 	preferredModeForPath,
 } from "@/lib/workspace/viewer";
+import { resolveVirtualView } from "@/lib/workspace/virtual-views";
 
 function findChildren(nodes: FileNode[], path: string): FileNode[] | undefined {
 	return treeFindNode(nodes, path)?.children;
@@ -147,45 +142,13 @@ export async function loadTabResources(
 	tree: FileNode[],
 	paperFolders: string[],
 ): Promise<TabResources> {
-	if (isTrashVirtualPath(path)) {
+	const view = resolveVirtualView(path);
+	if (view) {
 		return {
-			kind: "trash",
-			title: "Recycle Bin",
+			...view,
 			mode: "markdown",
 			paperMeta: null,
 			pdfUrl: null,
-			htmlUrl: null,
-			imageUrl: null,
-			notesPath: null,
-			notesSeed: "",
-			markdownSeed: "",
-			loaded: true,
-		};
-	}
-	if (isLibraryVirtualPath(path)) {
-		return {
-			kind: "library",
-			title: "Library",
-			mode: "markdown",
-			paperMeta: null,
-			pdfUrl: null,
-			htmlUrl: null,
-			imageUrl: null,
-			notesPath: null,
-			notesSeed: "",
-			markdownSeed: "",
-			loaded: true,
-		};
-	}
-	// Plaza is virtual and remote-only: never probe the filesystem for it.
-	if (isPlazaVirtualPath(path)) {
-		return {
-			kind: "plaza",
-			title: plazaTitleForPath(path),
-			mode: "markdown",
-			paperMeta: null,
-			pdfUrl: null,
-			htmlUrl: plazaSourceForPath(path)?.url ?? null,
 			imageUrl: null,
 			notesPath: null,
 			notesSeed: "",

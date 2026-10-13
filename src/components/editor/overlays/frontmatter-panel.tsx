@@ -40,7 +40,7 @@ import {
 	type FrontmatterProperty,
 	type FrontmatterPropertyKind,
 	parseFrontmatterProperties,
-	serializeFrontmatterProperties,
+	patchFrontmatterProperties,
 } from "@/lib/markdown/frontmatter";
 
 /** YAML list items conventionally indent with two spaces. */
@@ -83,6 +83,7 @@ export function FrontmatterPanel({
 	className,
 }: FrontmatterPanelProps) {
 	const { t } = useTranslation("editor");
+	const [formError, setFormError] = useState(false);
 	const [mode, setMode] = useState<EditorMode>("form");
 	const panelId = useId();
 	const parsed = useMemo(() => parseFrontmatterProperties(value), [value]);
@@ -110,21 +111,23 @@ export function FrontmatterPanel({
 		if (!parsed.ok) return;
 		setRows((prev) => {
 			if (prev.some((row) => !row.key.trim())) return prev;
-			const current = serializeFrontmatterProperties(stripRowIds(prev));
-			if (current === value) return prev;
+			if (
+				JSON.stringify(stripRowIds(prev)) === JSON.stringify(parsed.properties)
+			)
+				return prev;
 			return rowsFromProperties(parsed.properties);
 		});
-	}, [value, parsed]);
+	}, [parsed]);
 
 	const commitRows = (next: PropertyRowState[]) => {
 		if (readOnly) return;
 		setRows(next);
-		// Drop rows without a key so disk/YAML stays valid; blank drafts stay local.
-		onChange?.(
-			serializeFrontmatterProperties(
-				stripRowIds(next).filter((property) => property.key.trim()),
-			),
-		);
+		try {
+			onChange?.(patchFrontmatterProperties(value, stripRowIds(next)));
+			setFormError(false);
+		} catch {
+			setFormError(true);
+		}
 	};
 
 	const updateProperty = (index: number, next: FrontmatterProperty) => {
@@ -239,6 +242,11 @@ export function FrontmatterPanel({
 					</Tooltip>
 				</TooltipProvider>
 			</div>
+			{formError && (
+				<p role="alert" className="text-destructive text-xs">
+					{t("frontmatter.invalidKey")}
+				</p>
+			)}
 			<div className="litthread-scroll min-h-0 overflow-y-auto pr-1">
 				{showSource ? (
 					<>

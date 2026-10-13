@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { SettingsSection } from "@/components/settings/types";
 import { applyLocale } from "@/i18n";
 import { commands } from "@/lib/core/bindings";
+import { closeNativeWindow } from "@/lib/core/native-shell";
 import { isMacOS, isTauri } from "@/lib/core/tauri";
 import {
 	applyDocumentChrome,
@@ -23,8 +24,7 @@ function closeCurrentWindow() {
 	void (async () => {
 		if (!isTauri()) return;
 		try {
-			const { getCurrentWindow } = await import("@tauri-apps/api/window");
-			await getCurrentWindow().close();
+			await closeNativeWindow();
 		} catch (e) {
 			console.warn("[settings-native-root] close failed", e);
 		}

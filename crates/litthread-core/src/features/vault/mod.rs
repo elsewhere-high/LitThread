@@ -469,7 +469,7 @@ mod tests {
             .into_iter()
             .map(|(rel, _)| rel.to_string())
             .collect::<Vec<_>>();
-        assert_eq!(onboarding_paths.len(), 3);
+        assert_eq!(onboarding_paths.len(), 4);
         for rel in &onboarding_paths {
             assert!(dir.join(rel).is_file(), "missing onboarding note: {rel}");
         }
@@ -487,6 +487,8 @@ mod tests {
         fs::write(dir.join("AGENTS.md"), "# custom\n").unwrap();
         fs::write(dir.join(".agents/README.md"), "# keep\n").unwrap();
         fs::write(dir.join(&onboarding_paths[0]), "# edited\n").unwrap();
+        let evidence_path = "notes/04 Questions and Evidence.md";
+        fs::write(dir.join(evidence_path), "# my research workflow\n").unwrap();
         let r2 = create_vault(&dir, "en").expect("again");
         let content = fs::read_to_string(dir.join("AGENTS.md")).unwrap();
         assert!(content.starts_with("# custom"));
@@ -497,6 +499,11 @@ mod tests {
         let onboarding = fs::read_to_string(dir.join(&onboarding_paths[0])).unwrap();
         assert!(onboarding.starts_with("# edited"));
         assert!(!r2.created.iter().any(|c| c == &onboarding_paths[0]));
+        assert_eq!(
+            fs::read_to_string(dir.join(evidence_path)).unwrap(),
+            "# my research workflow\n"
+        );
+        assert!(!r2.created.iter().any(|c| c == evidence_path));
 
         let _ = fs::remove_dir_all(&dir);
     }
@@ -535,7 +542,17 @@ mod tests {
     fn localized_onboarding_files_are_flattened_under_notes() {
         for locale in ["en", "zh-CN"] {
             let onboarding_paths = bundled_onboarding_files(locale);
-            assert_eq!(onboarding_paths.len(), 3, "locale: {locale}");
+            assert_eq!(onboarding_paths.len(), 4, "locale: {locale}");
+            let expected = if locale == "en" {
+                "notes/04 Questions and Evidence.md"
+            } else {
+                "notes/04 问题与证据.md"
+            };
+            let (_, evidence) = onboarding_paths
+                .iter()
+                .find(|(path, _)| *path == expected)
+                .expect("evidence workflow guide is bundled");
+            assert!(evidence.contains("notes/research"));
             for (rel, _) in onboarding_paths {
                 assert_eq!(
                     Path::new(rel).parent(),

@@ -1,7 +1,6 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import type { LocalePreference } from "@/lib/settings";
-
 import enAgent from "./locales/en/agent.json";
 import enAiElements from "./locales/en/aiElements.json";
 import enApp from "./locales/en/app.json";
@@ -9,6 +8,7 @@ import enCommon from "./locales/en/common.json";
 import enEditor from "./locales/en/editor.json";
 import enMobile from "./locales/en/mobile.json";
 import enOnboarding from "./locales/en/onboarding.json";
+import enResearch from "./locales/en/research.json";
 import enSettings from "./locales/en/settings.json";
 import enShortcuts from "./locales/en/shortcuts.json";
 import enSidebar from "./locales/en/sidebar.json";
@@ -20,6 +20,7 @@ import zhCommon from "./locales/zh-CN/common.json";
 import zhEditor from "./locales/zh-CN/editor.json";
 import zhMobile from "./locales/zh-CN/mobile.json";
 import zhOnboarding from "./locales/zh-CN/onboarding.json";
+import zhResearch from "./locales/zh-CN/research.json";
 import zhSettings from "./locales/zh-CN/settings.json";
 import zhShortcuts from "./locales/zh-CN/shortcuts.json";
 import zhSidebar from "./locales/zh-CN/sidebar.json";
@@ -32,6 +33,7 @@ export const DEFAULT_NS = "common";
 
 export const resources = {
 	en: {
+		research: enResearch,
 		common: enCommon,
 		app: enApp,
 		settings: enSettings,
@@ -45,6 +47,7 @@ export const resources = {
 		onboarding: enOnboarding,
 	},
 	"zh-CN": {
+		research: zhResearch,
 		common: zhCommon,
 		app: zhApp,
 		settings: zhSettings,

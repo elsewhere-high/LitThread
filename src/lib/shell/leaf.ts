@@ -2,12 +2,12 @@
  * Window-move helpers for documents and feature views.
  */
 
-import { isLibraryVirtualPath, isTrashVirtualPath } from "@/lib/paper/api";
 import { openDocWindow } from "@/lib/shell/doc-window";
 import {
 	type FeatureViewType,
 	openFeatureWindow,
 } from "@/lib/shell/feature-window";
+import { canDetachDocument } from "@/lib/workspace/virtual-views";
 
 /** Move (or open) a feature view in its singleton native window. */
 export async function moveFeatureToWindow(
@@ -24,7 +24,7 @@ export async function moveDocToWindow(
 	path: string,
 	mode?: string,
 ): Promise<void> {
-	if (isLibraryVirtualPath(path) || isTrashVirtualPath(path)) {
+	if (!canDetachDocument(path)) {
 		return;
 	}
 	const { getTabs } = await import("@/lib/workspace/store");

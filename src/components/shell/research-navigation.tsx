@@ -3,6 +3,7 @@ import {
 	Compass,
 	FolderTree,
 	MessagesSquare,
+	ScanSearch,
 	Search,
 	Settings2,
 	Trash2,
@@ -17,11 +18,13 @@ import {
 } from "@/hooks/use-app-stores";
 import { isLibraryVirtualPath, isTrashVirtualPath } from "@/lib/paper/api";
 import { isPlazaVirtualPath } from "@/lib/plaza";
+import { RESEARCH_VIRTUAL_PATH } from "@/lib/research/model";
 import { openSettingsWindow } from "@/lib/shell/settings-window";
 import { openPalette, toggleSidebar } from "@/lib/shell/ui-store";
 import { toggleChat } from "@/lib/shell/ui-window-actions";
 import {
 	openDiscovery,
+	openTab,
 	selectLibrary,
 	selectTrash,
 } from "@/lib/workspace/actions";
@@ -38,11 +41,23 @@ export function ResearchNavigation() {
 	);
 	const discoveryEnabled = useSettings((s) => s.plazaEnabled);
 	const items: {
-		key: "library" | "outline" | "search" | "discover" | "conversation";
+		key:
+			| "research"
+			| "library"
+			| "outline"
+			| "search"
+			| "discover"
+			| "conversation";
 		icon: typeof BookOpen;
 		active: boolean;
 		action: () => void;
 	}[] = [
+		{
+			key: "research",
+			icon: ScanSearch,
+			active: activePath === RESEARCH_VIRTUAL_PATH,
+			action: () => openTab(RESEARCH_VIRTUAL_PATH),
+		},
 		{
 			key: "library",
 			icon: BookOpen,

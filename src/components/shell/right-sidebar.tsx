@@ -1,3 +1,4 @@
+import { openExternalUrl } from "@/lib/core/open-external";
 /**
  * Right rail: Agent chat.
  * Subscribes to stores directly.
@@ -34,11 +35,7 @@ function handleAgentOpenSource(source: string): void {
 	const trimmed = normalizeAgentSourcePath(source);
 	if (!trimmed) return;
 	if (/^https?:\/\//i.test(trimmed)) {
-		void import("@tauri-apps/plugin-opener")
-			.then(({ openUrl }) => openUrl(trimmed))
-			.catch(() => {
-				window.open(trimmed, "_blank", "noopener,noreferrer");
-			});
+		openExternalUrl(trimmed);
 		return;
 	}
 	openGraphPath(trimmed);

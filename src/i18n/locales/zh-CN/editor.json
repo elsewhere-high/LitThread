@@ -183,7 +183,8 @@
 		"typeText": "文本",
 		"typeList": "列表",
 		"typeCheckbox": "复选框",
-		"typeDate": "日期"
+		"typeDate": "日期",
+		"invalidKey": "属性名重复或需要在 YAML 源码中编辑，文档尚未更改。"
 	},
 	"wikiCompletion": {
 		"label": "双链候选",

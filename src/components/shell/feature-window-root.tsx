@@ -1,3 +1,8 @@
+import {
+	closeNativeWindow,
+	setNativeWindowTitle,
+} from "@/lib/core/native-shell";
+import { openExternalUrl } from "@/lib/core/open-external";
 /**
  * Lightweight root for `?window=feature&view=…` singleton popouts.
  * Opens the vault from query params and follows main-window active path.
@@ -70,8 +75,7 @@ function closeCurrentWindow() {
 	if (!isTauri()) return;
 	void (async () => {
 		try {
-			const { getCurrentWindow } = await import("@tauri-apps/api/window");
-			await getCurrentWindow().close();
+			await closeNativeWindow();
 		} catch {
 			// ignore
 		}
@@ -112,11 +116,7 @@ function handleAgentOpenSource(source: string): void {
 	const trimmed = normalizeAgentSourcePath(source);
 	if (!trimmed) return;
 	if (/^https?:\/\//i.test(trimmed)) {
-		void import("@tauri-apps/plugin-opener")
-			.then(({ openUrl }) => openUrl(trimmed))
-			.catch(() => {
-				window.open(trimmed, "_blank", "noopener,noreferrer");
-			});
+		openExternalUrl(trimmed);
 		return;
 	}
 	openGraphPath(trimmed);
@@ -349,8 +349,7 @@ export function FeatureWindowRoot() {
 		if (!isTauri()) return;
 		void (async () => {
 			try {
-				const { getCurrentWindow } = await import("@tauri-apps/api/window");
-				await getCurrentWindow().setTitle(title);
+				await setNativeWindowTitle(title);
 			} catch {
 				// ignore
 			}

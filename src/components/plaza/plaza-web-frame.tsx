@@ -22,37 +22,11 @@ import {
 } from "@/components/ui/tooltip";
 import { openExternalUrl } from "@/lib/core/open-external";
 import { cn } from "@/lib/core/utils";
-import { importPlazaPaper, type PlazaImportRequest } from "@/lib/plaza/import";
+import { readPlazaFrameAction } from "@/lib/plaza/frame-protocol";
+import { importPlazaPaper } from "@/lib/plaza/import";
 
 /** No `allow-popups`: every link must resolve inside this frame. */
 const SANDBOX = "allow-scripts allow-same-origin allow-forms";
-
-type NavMessage = {
-	source: "litthread-plaza";
-	/** In-frame navigation that just happened. */
-	path?: string;
-	/** Third-party link the frame refused to follow; open it outside. */
-	external?: string;
-	/**
-	 * Same-origin path the frame declined to render in place (a feed). Reopened
-	 * against the upstream site, since the browser cannot resolve our scheme.
-	 */
-	externalPath?: string;
-	/** A paper row's `[入库]` was clicked. */
-	importPaper?: PlazaImportRequest;
-};
-
-function isNavMessage(data: unknown): data is NavMessage {
-	if (typeof data !== "object" || data === null) return false;
-	const value = data as Partial<NavMessage>;
-	if (value.source !== "litthread-plaza") return false;
-	return (
-		typeof value.path === "string" ||
-		typeof value.external === "string" ||
-		typeof value.externalPath === "string" ||
-		typeof value.importPaper === "object"
-	);
-}
 
 export function PlazaWebFrame({
 	homeUrl,
@@ -67,7 +41,7 @@ export function PlazaWebFrame({
 	title: string;
 	className?: string;
 }) {
-	const { t } = useTranslation("sidebar");
+	const { t, i18n } = useTranslation("sidebar");
 	const homePath = `${new URL(homeUrl).pathname || "/"}${new URL(homeUrl).search}`;
 	/** Visited paths and the cursor into them. Grown by proxy nav messages. */
 	const [nav, setNav] = useState<{ stack: string[]; index: number }>({
@@ -83,6 +57,16 @@ export function PlazaWebFrame({
 	const [frame, setFrame] = useState({ path: homePath, epoch: 0 });
 	/** Needed to post import results back into the frame. */
 	const frameRef = useRef<HTMLIFrameElement>(null);
+	const language = i18n.resolvedLanguage ?? "en";
+	const configureFrame = useCallback(
+		() =>
+			frameRef.current?.contentWindow?.postMessage(
+				{ source: "litthread-plaza-host", kind: "configure", language },
+				embedOrigin ?? "*",
+			),
+		[embedOrigin, language],
+	);
+	useEffect(configureFrame, [configureFrame]);
 	/** While HTML5 DnD is active, disable frame hit-testing so dragover reaches
 	 *  dockview drop targets (the frame otherwise swallows drag events). */
 	const [dragShield, setDragShield] = useState(false);
@@ -103,22 +87,26 @@ export function PlazaWebFrame({
 	useEffect(() => {
 		if (!embedOrigin) return;
 		const onMessage = (event: MessageEvent) => {
-			if (event.origin !== embedOrigin || !isNavMessage(event.data)) return;
-			const { path, external, externalPath, importPaper } = event.data;
-			if (external) {
-				openExternalUrl(external);
+			const sourceFrame = frameRef.current?.contentWindow ?? null;
+			const action = readPlazaFrameAction(event, {
+				origin: embedOrigin,
+				frame: sourceFrame,
+				homeUrl,
+			});
+			if (!action) return;
+			if (action.kind === "external") {
+				openExternalUrl(action.url);
 				return;
 			}
-			if (externalPath) {
-				openExternalUrl(new URL(externalPath, homeUrl).href);
-				return;
-			}
-			if (importPaper) {
+			if (action.kind === "import") {
+				const importPaper = action.paper;
 				void importPlazaPaper(importPaper).then((ok) => {
-					frameRef.current?.contentWindow?.postMessage(
+					if (frameRef.current?.contentWindow !== sourceFrame) return;
+					sourceFrame?.postMessage(
 						{
 							source: "litthread-plaza-host",
 							importedId: importPaper.id,
+							requestId: action.requestId,
 							ok,
 						},
 						embedOrigin,
@@ -126,7 +114,7 @@ export function PlazaWebFrame({
 				});
 				return;
 			}
-			if (!path) return;
+			const path = action.path;
 			setNav((prev) => {
 				// Already at this entry — either a reload, or the load caused by our
 				// own Back / Forward, which moved the cursor before the frame reported.
@@ -242,6 +230,7 @@ export function PlazaWebFrame({
 					key={frame.epoch}
 					ref={frameRef}
 					title={title}
+					onLoad={configureFrame}
 					src={frameSrc}
 					sandbox={SANDBOX}
 					referrerPolicy="no-referrer-when-downgrade"

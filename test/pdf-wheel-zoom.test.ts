@@ -24,6 +24,122 @@ function frameHarness() {
 }
 
 describe("PDF wheel zoom coalescer", () => {
+	it("reaches the step boundary after ten small wheel ticks", () => {
+		const frames = frameHarness();
+		const onZoomOut = vi.fn();
+		const coalescer = createWheelZoomCoalescer({
+			onZoomIn: vi.fn(),
+			onZoomOut,
+			requestFrame: frames.requestFrame,
+			cancelFrame: frames.cancelFrame,
+		});
+		for (let tick = 0; tick < 10; tick += 1) {
+			coalescer.addDelta(10);
+			frames.flush();
+		}
+		expect(onZoomOut).toHaveBeenCalledTimes(1);
+	});
+
+	it("ignores a non-finite event without poisoning later wheel input", () => {
+		const frames = frameHarness();
+		const onZoomIn = vi.fn();
+		const onZoomOut = vi.fn();
+		const coalescer = createWheelZoomCoalescer({
+			onZoomIn,
+			onZoomOut,
+			requestFrame: frames.requestFrame,
+			cancelFrame: frames.cancelFrame,
+		});
+		coalescer.addDelta(Number.NaN);
+		coalescer.addDelta(Number.POSITIVE_INFINITY);
+		coalescer.addDelta(Number.NEGATIVE_INFINITY);
+		coalescer.addDelta(-100);
+		frames.flush();
+		expect(onZoomIn).toHaveBeenCalledTimes(1);
+		expect(onZoomOut).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		0,
+		-1,
+		Number.NaN,
+		Number.POSITIVE_INFINITY,
+	])("uses the default step for invalid threshold %s", (threshold) => {
+		const frames = frameHarness();
+		const onZoomOut = vi.fn();
+		const coalescer = createWheelZoomCoalescer({
+			threshold,
+			onZoomIn: vi.fn(),
+			onZoomOut,
+			requestFrame: frames.requestFrame,
+			cancelFrame: frames.cancelFrame,
+		});
+		coalescer.addDelta(150);
+		frames.flush();
+		expect(onZoomOut).toHaveBeenCalledTimes(1);
+	});
+
+	it("ignores a stale frame even if the scheduler delivers it after reset", () => {
+		const frames = frameHarness();
+		const onZoomOut = vi.fn();
+		const coalescer = createWheelZoomCoalescer({
+			onZoomIn: vi.fn(),
+			onZoomOut,
+			requestFrame: frames.requestFrame,
+			cancelFrame: frames.cancelFrame,
+		});
+		coalescer.addDelta(200);
+		const stale = frames.requestFrame.mock.calls[0][0];
+		coalescer.reset();
+		coalescer.addDelta(100);
+		stale(0);
+		expect(onZoomOut).not.toHaveBeenCalled();
+		frames.flush();
+		expect(onZoomOut).toHaveBeenCalledTimes(1);
+	});
+
+	it.each([
+		"reset",
+		"dispose",
+	] as const)("stops the current batch when a zoom callback calls %s", (action) => {
+		const frames = frameHarness();
+		const onZoomIn = vi.fn();
+		const onZoomOut = vi.fn(() => coalescer[action]());
+		const coalescer = createWheelZoomCoalescer({
+			onZoomIn,
+			onZoomOut,
+			requestFrame: frames.requestFrame,
+			cancelFrame: frames.cancelFrame,
+		});
+		coalescer.addDelta(350);
+		frames.flush();
+		expect(onZoomOut).toHaveBeenCalledTimes(1);
+		expect(onZoomIn).not.toHaveBeenCalled();
+	});
+
+	it("bounds a pathological wheel burst and accepts the next gesture", () => {
+		const frames = frameHarness();
+		let callbacks = 0;
+		const onZoomOut = vi.fn(() => {
+			callbacks += 1;
+			if (callbacks > 64) throw new Error("unbounded zoom callbacks");
+		});
+		const onZoomIn = vi.fn();
+		const coalescer = createWheelZoomCoalescer({
+			onZoomIn,
+			onZoomOut,
+			requestFrame: frames.requestFrame,
+			cancelFrame: frames.cancelFrame,
+		});
+		coalescer.addDelta(Number.MAX_VALUE);
+		frames.flush();
+		expect(callbacks).toBeGreaterThan(0);
+		expect(callbacks).toBeLessThanOrEqual(32);
+		coalescer.addDelta(-100);
+		frames.flush();
+		expect(onZoomIn).toHaveBeenCalledTimes(1);
+	});
+
 	it("coalesces deltas from multiple wheel events into one frame flush", () => {
 		const frames = frameHarness();
 		const onZoomIn = vi.fn();
@@ -264,6 +380,24 @@ function gestureTargetHarness() {
 }
 
 describe("PDF wheel zoom WebKit gesture binding", () => {
+	it("ignores invalid scales without replacing the last valid baseline", () => {
+		const harness = gestureTargetHarness();
+		const onZoomWheel = vi.fn();
+		bindWheelZoomGesture({ target: harness.target, onZoomWheel });
+		harness.dispatch("gesturestart", 1);
+		harness.dispatch("gesturechange", 1.1);
+		onZoomWheel.mockClear();
+		for (const scale of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+			harness.dispatch("gesturechange", scale);
+		}
+		expect(onZoomWheel).not.toHaveBeenCalled();
+		harness.dispatch("gesturechange", 1.21);
+		expect(onZoomWheel).toHaveBeenCalledTimes(1);
+		expect(onZoomWheel.mock.calls[0][0].deltaY).toBeCloseTo(
+			-1000 * Math.log(1.1),
+		);
+	});
+
 	it("translates pinch-out scale increases into zoom-in deltas", () => {
 		const harness = gestureTargetHarness();
 		const onZoomWheel = vi.fn();

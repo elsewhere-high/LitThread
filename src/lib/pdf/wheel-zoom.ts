@@ -3,16 +3,17 @@
  *
  * Trackpad pinch / Ctrl+wheel delivers many small wheel events per second.
  * Applying a zoom step per event re-rasterizes every visible page (main-thread
- * PDFium) once per event. This coalescer accumulates deltas and applies all
- * resulting steps in one synchronous batch per animation frame, so React and
- * EmbedPDF only re-render once per frame regardless of event rate.
+ * PDFium) once per event. This coalescer applies bounded batches per animation
+ * frame, retains fractional input, and cancels stale batches after reset.
  */
 
 /** One discrete zoom step per this much accumulated wheel deltaY. */
 const WHEEL_ZOOM_STEP_DELTA = 100;
+/** Saturate extreme device input so one frame cannot monopolize the UI thread. */
+const MAX_WHEEL_ZOOM_STEPS = 32;
 
 type WheelZoomCoalescerOptions = {
-	/** Wheel delta that produces one zoom step. */
+	/** Positive, finite wheel delta per step; invalid values use the default. */
 	threshold?: number;
 	onZoomIn: () => void;
 	onZoomOut: () => void;
@@ -35,43 +36,53 @@ export function createWheelZoomCoalescer({
 	requestFrame = (callback) => requestAnimationFrame(callback),
 	cancelFrame = (handle) => cancelAnimationFrame(handle),
 }: WheelZoomCoalescerOptions): WheelZoomCoalescer {
-	let accumulated = 0;
+	const stepDelta =
+		Number.isFinite(threshold) && threshold > 0
+			? threshold
+			: WHEEL_ZOOM_STEP_DELTA;
+	// Keep native delta units: ten 10-pixel ticks must reach a 100-pixel step
+	// without the rounding loss from adding ten fractional 0.1-step values.
+	const maxDelta = Math.min(Number.MAX_VALUE, stepDelta * MAX_WHEEL_ZOOM_STEPS);
+	let queuedDelta = 0;
 	let pendingFrame: number | null = null;
 	let disposed = false;
+	let revision = 0;
 
-	const flush = () => {
+	const flush = (scheduledRevision: number) => {
+		if (disposed || scheduledRevision !== revision) return;
 		pendingFrame = null;
-		if (disposed) return;
-		while (Math.abs(accumulated) >= threshold) {
-			if (accumulated > 0) {
-				onZoomOut();
-				accumulated -= threshold;
-			} else {
-				onZoomIn();
-				accumulated += threshold;
-			}
+		const steps = Math.trunc(queuedDelta / stepDelta);
+		queuedDelta %= stepDelta;
+		const zoom = steps > 0 ? onZoomOut : onZoomIn;
+		for (let remaining = Math.abs(steps); remaining > 0; remaining -= 1) {
+			if (disposed || revision !== scheduledRevision) break;
+			zoom();
 		}
+	};
+	const reset = () => {
+		revision += 1;
+		queuedDelta = 0;
+		if (pendingFrame !== null) cancelFrame(pendingFrame);
+		pendingFrame = null;
 	};
 
 	return {
 		addDelta(delta: number) {
-			if (disposed) return;
-			accumulated += delta;
+			if (disposed || !Number.isFinite(delta) || delta === 0) return;
+			queuedDelta = Math.max(
+				-maxDelta,
+				Math.min(maxDelta, queuedDelta + delta),
+			);
 			if (pendingFrame === null) {
-				pendingFrame = requestFrame(flush);
+				const scheduledRevision = revision;
+				pendingFrame = requestFrame(() => flush(scheduledRevision));
 			}
 		},
-		reset() {
-			accumulated = 0;
-		},
+		reset,
 		dispose() {
 			if (disposed) return;
 			disposed = true;
-			accumulated = 0;
-			if (pendingFrame !== null) {
-				cancelFrame(pendingFrame);
-				pendingFrame = null;
-			}
+			reset();
 		},
 	};
 }
@@ -167,22 +178,27 @@ export function bindWheelZoomGesture({
 	// GestureEvents instead of ctrl+wheel ticks; feed the same coalescer with a
 	// wheel-equivalent delta derived from the magnification ratio.
 	let gestureScale = 1;
+	const validScale = (scale: number) => Number.isFinite(scale) && scale > 0;
 	const handleGestureStart = (raw: Event) => {
 		if (disposed) return;
 		const event = raw as unknown as WebKitGestureEvent;
 		event.preventDefault();
-		gestureScale = event.scale || 1;
+		gestureScale = validScale(event.scale) ? event.scale : 1;
+		clearIdleTimer();
+		setPassive(false);
 	};
 	const handleGestureChange = (raw: Event) => {
 		if (disposed) return;
 		const event = raw as unknown as WebKitGestureEvent;
 		event.preventDefault();
-		const scale = event.scale || 1;
-		const ratio = scale / gestureScale;
+		const scale = event.scale;
+		if (!validScale(scale)) return;
+		// Log differences avoid overflow when the two finite scales are far apart.
+		const magnification = Math.log(scale) - Math.log(gestureScale);
 		gestureScale = scale;
-		if (!(ratio > 0) || ratio === 1) return;
+		if (magnification === 0) return;
 		onZoomWheel({
-			deltaY: -GESTURE_SCALE_DELTA_GAIN * Math.log(ratio),
+			deltaY: -GESTURE_SCALE_DELTA_GAIN * magnification,
 		} as unknown as WheelEvent);
 	};
 	const handleGestureEnd = (raw: Event) => {

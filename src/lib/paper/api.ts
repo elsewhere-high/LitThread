@@ -116,10 +116,15 @@ export function filterPapersByScope<T extends PaperMetadata>(
 	scopeRel: string | null | undefined,
 ): T[] {
 	if (scopeRel == null || scopeRel === "") return papers;
-	if (!isPapersLibraryScope(scopeRel)) return papers;
 	const s = normalizeLibraryScope(scopeRel);
-	if (!s) return papers;
-	return papers.filter((p) => paperInLibraryScope(p.path, s));
+	if (s !== "papers" && !s.startsWith("papers/")) return papers;
+	// Scope and descendant boundary are constant across the whole catalog.
+	const prefix = `${s}/`;
+	return papers.filter(({ path }) => {
+		if (!path) return false;
+		const normalized = normalizeLibraryScope(path);
+		return normalized === s || normalized.startsWith(prefix);
+	});
 }
 
 export async function listPapers(

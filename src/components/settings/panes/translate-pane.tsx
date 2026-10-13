@@ -28,6 +28,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { BUILTIN_PROVIDER_ID } from "@/lib/core/builtin";
+import { openExternalUrl } from "@/lib/core/open-external";
 import { isTauri } from "@/lib/core/tauri";
 import { cn } from "@/lib/core/utils";
 import type {
@@ -56,14 +57,6 @@ import {
 	probeCommercialMtProvider,
 	probeFreeMtProviders,
 } from "@/lib/translate";
-
-function openExternalUrl(url: string): void {
-	void import("@tauri-apps/plugin-opener")
-		.then(({ openUrl }) => openUrl(url))
-		.catch(() => {
-			window.open(url, "_blank", "noopener,noreferrer");
-		});
-}
 
 const EMPTY_PROVIDER_CONFIG: TranslateProviderConfig = {
 	apiKey: "",

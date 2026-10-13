@@ -19,8 +19,8 @@ dirs = "6"
 log = "0.4"
 tempfile = "3"
 
-# Profiles only take effect from the workspace root. Shipped binaries were
-# unstripped and non-LTO (#320): GUI 76MB, headless CLI 31MB.
+# Workspace release settings: strip symbols and optimize across crate boundaries.
+# Binary sizes must be measured on the current platform and build.
 [profile.release]
 strip = true
 lto = true

@@ -129,6 +129,21 @@ describe("filterPapersByScope", () => {
 		expect(filterPapersByScope(rows, ".agents")).toHaveLength(4);
 		expect(filterPapersByScope(rows, "plans/todo")).toHaveLength(4);
 	});
+
+	it("agrees with individual matching across path formats and folder boundaries", () => {
+		const candidates = [
+			...rows,
+			paper("PAPERS\\NLP\\Windows"),
+			paper("papers/nlpaper/sibling"),
+			paper("papers/nlp"),
+			paper(""),
+		];
+		for (const scope of [null, "", "Papers\\NLP\\", "/papers/", "notes"]) {
+			expect(filterPapersByScope(candidates, scope)).toEqual(
+				candidates.filter((row) => paperInLibraryScope(row.path, scope)),
+			);
+		}
+	});
 });
 
 describe("filterPapersByScope latency", () => {

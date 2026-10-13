@@ -1,3 +1,4 @@
+import { closeNativeWindow } from "@/lib/core/native-shell";
 /**
  * Lightweight root for `?window=doc&path=…` document popouts.
  */
@@ -32,8 +33,7 @@ function closeCurrentWindow() {
 	if (!isTauri()) return;
 	void (async () => {
 		try {
-			const { getCurrentWindow } = await import("@tauri-apps/api/window");
-			await getCurrentWindow().close();
+			await closeNativeWindow();
 		} catch {
 			// ignore
 		}

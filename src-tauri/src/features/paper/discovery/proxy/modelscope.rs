@@ -260,9 +260,12 @@ html body { overflow-y: visible !important; }
         event.stopImmediatePropagation();
         if (target.dataset.state) return;
         var id = target.dataset.paperId;
+        var requestId = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : String(Date.now()) + "-" + Math.random();
+        target.dataset.requestId = requestId;
         target.dataset.state = "pending";
         setLabel(target, LABELS.pending);
         post({
+          requestId: requestId,
           importPaper: {
             id: id,
             branch: "arxiv",
@@ -318,13 +321,15 @@ html body { overflow-y: visible !important; }
 
     window.addEventListener("message", function (event) {
       var data = event.data;
-      if (!data || data.source !== "litthread-plaza-host") return;
+      if (event.source !== parent || !data || data.source !== "litthread-plaza-host") return;
+      if (typeof data.ok !== "boolean" || typeof data.requestId !== "string") return;
       if (typeof data.importedId !== "string") return;
       // arXiv ids contain dots, so id-based DOM lookups are out.
       var buttons = document.querySelectorAll(".litthread-import");
       for (var i = 0; i < buttons.length; i++) {
         var el = buttons[i];
-        if (el.dataset.paperId !== data.importedId) continue;
+        if (el.dataset.paperId !== data.importedId || el.dataset.requestId !== data.requestId) continue;
+        delete el.dataset.requestId;
         if (data.ok) {
           el.dataset.state = "done";
           setLabel(el, LABELS.done);

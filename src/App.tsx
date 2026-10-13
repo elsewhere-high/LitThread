@@ -1,3 +1,4 @@
+import { focusNativeWindow } from "@/lib/core/native-shell";
 /**
  * App shell: thin composition layer. Domain state lives in zustand vanilla
  * stores (`src/lib/<domain>/store.ts`) and behavior in plain action modules;
@@ -253,8 +254,7 @@ export default function App() {
 			openRightTab("agent");
 			void (async () => {
 				try {
-					const { getCurrentWindow } = await import("@tauri-apps/api/window");
-					await getCurrentWindow().setFocus();
+					await focusNativeWindow();
 				} catch {
 					// ignore
 				}

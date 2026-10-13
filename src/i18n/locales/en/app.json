@@ -299,6 +299,7 @@
 		},
 		"sourcesEyebrow": "DISCOVERY DESK",
 		"sourceOpen": "Explore source",
-		"noSources": "Enable sources in Settings to start exploring."
+		"noSources": "Enable sources in Settings to start exploring.",
+		"research": "Evidence"
 	}
 }

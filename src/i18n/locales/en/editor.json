@@ -183,7 +183,8 @@
 		"typeText": "Text",
 		"typeList": "List",
 		"typeCheckbox": "Checkbox",
-		"typeDate": "Date"
+		"typeDate": "Date",
+		"invalidKey": "This key is duplicated or needs YAML source editing. The document has not changed."
 	},
 	"wikiCompletion": {
 		"label": "Internal link suggestions",
