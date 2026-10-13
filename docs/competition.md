@@ -4,6 +4,17 @@
 
 材料须按报名确认邮件指引，于 **2026-10-16 24:00 前**打包发送至 `oscc@oschina.cn`。评审权重为技术创新 30%、场景落地 30%、开源治理 20%、长期发展 20%。材料准备和 GitHub 发布不代表已完成报名或邮件提交。
 
+## 作品材料
+
+| 材料 | 入口与状态 |
+| --- | --- |
+| 公开源码 | [elsewhere-high/LitThread](https://github.com/elsewhere-high/LitThread)，主分支已公开 |
+| 作品介绍 | [OS2026 Release](https://github.com/elsewhere-high/LitThread/releases/tag/os2026-20261013) 中的 `LitThread-OS2026-Project-Introduction.pdf`；8 页，含背景、架构、场景、创新点、验证与第三方说明 |
+| 功能样本 | 同一 Release 的 `LitThread-OS2026-Demo-Samples.zip`，包含两份自编中文 PDF |
+| 演示视频 | 尚未完成录制与上传；不能把当前 Release 作为已提供视频链接的完整提交材料 |
+
+介绍中的界面来自独立功能验证知识库；AI 页说明实际实现的提示词与权限流程，不冒充模型回答。视频脚本、中文旁白与隔离演示环境已准备好，后续补充实机流程及真实 Agent 调用验证。
+
 ## 项目定位与本轮贡献
 
 LitThread · 文脉服务个人文献研究。把研究问题、假设、支持证据、反证与结论连接在同一工作台，研究记录以普通 Markdown 保存在用户知识库，AI 参与审查而不替代原文核对。
