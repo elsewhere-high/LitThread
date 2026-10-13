@@ -76,3 +76,9 @@ pnpm tauri dev
 最终 `pnpm exec vitest run --maxWorkers=1 --reporter=dot` 为 142 个文件通过、1 个文件跳过，1221 项通过、5 项跳过。TypeScript、Biome、依赖分层、Rust workspace 测试、rustfmt、Clippy 和生产构建通过。Biome 保留 6 个既有警告与 1 条信息，Vite 保留现有大分块提示，Vitest 有 Node localStorage 实验性提示。
 
 使用独立标识 `local.litthread.refactor20261013` 和 `.qa/refactor-2026-10-13/vault` 实测原生界面：papers/nlp 筛选从 5 篇变为 3 篇，演示 PDF 与中文 Markdown 笔记正常显示。实际触控板捏合、线上 Agent 与远程服务未实测，不以单元测试代替这些结果。演示库、构建和测试日志在忽略的 `.qa/refactor-2026-10-13/` 中。项目署名沿用 Ustinian5，参赛材料记录具体贡献；第三方声明、项目许可和 Git 历史保留，未推送或发布。
+
+## 2026-10-13 参赛视频实机验证
+
+macOS 内置录屏对独立应用窗口捕获，剪辑并配中文说明旁白和字幕。独立知识库中完成两份自编中文 PDF 的导入、阅读、支持与反证录入、提示词检查、ACP / Codex 实际审查、Markdown 新文件保存、双链打开来源笔记及 PDF 复核。Agent 核实两条摘录和第 1 页，并指出功能样本不构成研究效果验证。Agent 未修改源资料；本次未评测模型准确率。
+
+实测发现全中文文件名被压缩为同一 `paper` 标识，导致不同文献误合并。标识生成改为保留 Unicode 字母与数字，保留分隔符清理和长度限制；core 测试 413 项通过、3 项既有忽略，rustfmt、core Clippy 与原生构建通过。重新在空演示知识库导入，确认两个独立条目及对应 PDF。原始录屏、隔离环境和日志保存在忽略的 `.qa/contest2026/`，导出材料不提交源码；公开发布由用户明确授权。

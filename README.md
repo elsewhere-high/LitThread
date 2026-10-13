@@ -8,6 +8,8 @@
 
 英文名 `LitThread` 用于项目目录和应用文件名，中文名“文脉”用于界面与文档；包名和命令标识为 `litthread`。
 
+参赛材料：[OS2026 作品介绍与演示视频](https://github.com/elsewhere-high/LitThread/releases/tag/os2026-20261013-final) · 开源 AI 工具赛道。
+
 ## 开始使用
 
 开发需要 Node.js、pnpm、Rust stable、CMake 与平台原生编译工具。macOS 需要 Xcode 命令行工具；首次原生构建会下载 PDFium 并编译 OCR 依赖。依赖版本由 `pnpm-lock.yaml` 与 `Cargo.lock` 固定。

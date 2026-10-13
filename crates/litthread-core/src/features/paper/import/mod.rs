@@ -819,7 +819,7 @@ pub fn slug_from_stem(stem: &str) -> String {
     let mut s = String::new();
     let mut prev_sep = true; // suppress leading separators
     for c in stem.trim().chars() {
-        if c.is_ascii_alphanumeric() || c == '.' {
+        if c.is_alphanumeric() || c == '.' {
             s.push(c);
             prev_sep = false;
         } else if !prev_sep {
@@ -1314,6 +1314,12 @@ mod tests {
         assert_eq!(slug_from_stem("1706.03762"), "1706.03762");
         assert_eq!(slug_from_stem("  spaced  "), "spaced");
         assert_eq!(slug_from_stem("!!!"), "paper");
+        assert_eq!(slug_from_stem("证据记录规范"), "证据记录规范");
+        assert_eq!(slug_from_stem("研究结论的适用边界"), "研究结论的适用边界");
+        assert_ne!(
+            slug_from_stem("证据记录规范"),
+            slug_from_stem("研究结论的适用边界")
+        );
     }
 
     #[test]
